@@ -109,7 +109,7 @@
   <input id="password" type="password" placeholder="stage password" />
 
   <button onclick="unlockBulkOpen()">Allow popups for this page</button>
-  <button onclick="openMinimalTabs()">Open minimal tabs with auth</button>
+  <button onclick="openMinimalTabs()">Open and close minimal tabs with auth</button>
   <button onclick="openAll(true)">Open all and close tabs</button>
   <button onclick="openAll(false)">Open all and keep tabs open</button>
 
@@ -298,7 +298,7 @@
     }
 
     function openMinimalTabs() {
-      openDomainGroup(minimalDomains, false, 'minimal tabs');
+      openDomainGroup(minimalDomains, true, 'minimal tabs');
     }
 
     function openSingle(domain) {
