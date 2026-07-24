@@ -101,6 +101,11 @@
     That does not always mean Basic Auth failed.
   </p>
 
+  <p class="hint">
+    Bulk open now retries each domain several times automatically to help with
+    flaky Basic Auth behavior on some servers.
+  </p>
+
   <p class="danger-hint">
     Important: credentials are stored in this file and passed via URL during auth.
     Use only for internal staging.
@@ -147,11 +152,13 @@
     const domainSettings = {
       'admin-medianews.obozrevatel.com': {
         displayPath: '/login',
-        authPath: '/login'
+        authPath: '/login',
+        authCycles: 3
       }
     };
-    const openDelayMs = 500;
-    const closeDelayMs = 10000;
+    const openDelayMs = 1200;
+    const authStepDelayMs = 1600;
+    const closeDelayMs = 16000;
     const popupWarmupCount = 3;
 
     const domainsList = document.getElementById('domainsList');
@@ -199,6 +206,36 @@
       return `https://${domain}${settings.displayPath}`;
     }
 
+    function getNavigationPlan(domain, credentials) {
+      const settings = getDomainSettings(domain);
+      const authUrl = getAuthUrl(domain, credentials);
+      const plainUrl = getPlainUrl(domain);
+      const authCycles = settings.authCycles || 2;
+      const steps = [];
+
+      for (let index = 0; index < authCycles; index += 1) {
+        steps.push(authUrl, plainUrl);
+      }
+
+      return steps;
+    }
+
+    function runNavigationSequence(tab, domain, credentials, startDelayMs) {
+      const steps = getNavigationPlan(domain, credentials);
+
+      steps.forEach((url, stepIndex) => {
+        setTimeout(() => {
+          try {
+            tab.location.replace(url);
+          } catch (error) {
+            console.warn(`Failed to open domain: ${domain}`, error);
+          }
+        }, startDelayMs + stepIndex * authStepDelayMs);
+      });
+
+      return steps.length;
+    }
+
     function openSingle(domain) {
       const credentials = getCredentials();
 
@@ -206,8 +243,14 @@
         return;
       }
 
-      const url = getAuthUrl(domain, credentials);
-      window.open(url, '_blank');
+      const tab = window.open('about:blank', '_blank');
+
+      if (!tab) {
+        setStatus('Browser blocked the tab. Allow popups for this page and try again.', true);
+        return;
+      }
+
+      runNavigationSequence(tab, domain, credentials, 0);
     }
 
     function unlockBulkOpen() {
@@ -297,19 +340,12 @@
       if (blockedDomains.length) {
         setStatus(`Opened ${openedTabs.length} of ${domains.length}. Browser blocked: ${blockedDomains.join(', ')}`, true);
       } else {
-        setStatus(`Opened ${openedTabs.length} tabs. Authorizing domains...`);
+        setStatus(`Opened ${openedTabs.length} tabs. Running several auth passes for each domain...`);
       }
 
       openedTabs.forEach(({ domain, tab }, index) => {
-        const url = getAuthUrl(domain, credentials);
-
-        setTimeout(() => {
-          try {
-            tab.location.replace(url);
-          } catch (error) {
-            console.warn(`Failed to open domain: ${domain}`, error);
-          }
-        }, index * openDelayMs);
+        const startDelayMs = index * openDelayMs;
+        const stepsCount = runNavigationSequence(tab, domain, credentials, startDelayMs);
 
         if (shouldCloseTabs) {
           setTimeout(() => {
@@ -318,7 +354,7 @@
             } catch (error) {
               console.warn(`Failed to close tab: ${domain}`, error);
             }
-          }, index * openDelayMs + closeDelayMs);
+          }, startDelayMs + stepsCount * authStepDelayMs + closeDelayMs);
         }
       });
     }
