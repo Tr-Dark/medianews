@@ -82,12 +82,18 @@
   <label>Password</label>
   <input id="password" type="password" placeholder="stage password" />
 
+  <button onclick="unlockBulkOpen()">Allow popups for this page</button>
   <button onclick="openAll(true)">Open all and close tabs</button>
   <button onclick="openAll(false)">Open all and keep tabs open</button>
 
   <p class="hint">
     This page opens all protected Medianews stage domains with Basic Auth.
     Tabs are pre-opened on click to reduce popup blocking.
+  </p>
+
+  <p class="hint">
+    If the browser opens only the first tab, click <strong>Allow popups for this page</strong>,
+    allow popups in the browser, and then run the bulk open again.
   </p>
 
   <p class="hint">
@@ -146,6 +152,7 @@
     };
     const openDelayMs = 500;
     const closeDelayMs = 10000;
+    const popupWarmupCount = 3;
 
     const domainsList = document.getElementById('domainsList');
     const status = document.getElementById('status');
@@ -201,6 +208,49 @@
 
       const url = getAuthUrl(domain, credentials);
       window.open(url, '_blank');
+    }
+
+    function unlockBulkOpen() {
+      const warmupTabs = [];
+
+      for (let index = 0; index < Math.min(domains.length, popupWarmupCount); index += 1) {
+        const tab = window.open('about:blank', `stage-popup-warmup-${index}`);
+
+        if (!tab) {
+          setStatus(
+            'Browser still blocks popups. Click the popup icon in the address bar, allow popups for this page, and try this button again.',
+            true
+          );
+          return;
+        }
+
+        tab.document.write(`
+          <!doctype html>
+          <html lang="en">
+            <head>
+              <meta charset="UTF-8" />
+              <title>Popup access check</title>
+            </head>
+            <body style="font-family: Arial, sans-serif; padding: 16px;">
+              <p>Popup access check for Medianews...</p>
+            </body>
+          </html>
+        `);
+        tab.document.close();
+        warmupTabs.push(tab);
+      }
+
+      setStatus('Popup access looks available. If the browser showed a prompt, click Allow and then use Open all.');
+
+      setTimeout(() => {
+        warmupTabs.forEach(tab => {
+          try {
+            tab.close();
+          } catch (error) {
+            console.warn('Failed to close warmup tab', error);
+          }
+        });
+      }, 1500);
     }
 
     function openAll(shouldCloseTabs) {
