@@ -71,6 +71,32 @@
       color: #b00020;
       font-size: 14px;
     }
+
+    .domain-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .minimal-dot {
+      width: 10px;
+      height: 10px;
+      min-width: 10px;
+      border-radius: 50%;
+      background: #1a7f37;
+      box-shadow: 0 0 0 2px rgba(26, 127, 55, 0.15);
+    }
+
+    .legend {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #555;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
   </style>
 </head>
 <body>
@@ -83,6 +109,7 @@
   <input id="password" type="password" placeholder="stage password" />
 
   <button onclick="unlockBulkOpen()">Allow popups for this page</button>
+  <button onclick="openMinimalTabs()">Open minimal tabs with auth</button>
   <button onclick="openAll(true)">Open all and close tabs</button>
   <button onclick="openAll(false)">Open all and keep tabs open</button>
 
@@ -112,6 +139,10 @@
   </p>
 
   <h3>Domains:</h3>
+  <div class="legend">
+    <span class="minimal-dot"></span>
+    <span>Minimal tabs</span>
+  </div>
   <p id="status" class="hint"></p>
   <ul id="domainsList"></ul>
 
@@ -147,6 +178,23 @@
       'realty2.obozrevatel.com',
       'admin-medianews.obozrevatel.com'
     ];
+    const minimalDomains = [
+      'www2.obozrevatel.com',
+      'cdn4.obozrevatel.com',
+      'i4.obozrevatel.com',
+      'news2.obozrevatel.com',
+      'war2.obozrevatel.com',
+      'soc2.obozrevatel.com',
+      'incident2.obozrevatel.com',
+      'hot2.obozrevatel.com',
+      'healthnews2.obozrevatel.com',
+      'finance2.obozrevatel.com',
+      'competitions2.obozrevatel.com',
+      'sport2.obozrevatel.com',
+      'food2.obozrevatel.com',
+      'shkola2.obozrevatel.com'
+    ];
+    const minimalDomainSet = new Set(minimalDomains);
 
     const defaultPath = '/';
     const domainSettings = {
@@ -249,6 +297,10 @@
       return domains.filter(domain => getDomainSettings(domain).revisitAfterBulkOpen);
     }
 
+    function openMinimalTabs() {
+      openDomainGroup(minimalDomains, false, 'minimal tabs');
+    }
+
     function openSingle(domain) {
       const credentials = getCredentials();
 
@@ -309,13 +361,17 @@
     }
 
     function openAll(shouldCloseTabs) {
+      openDomainGroup(domains, shouldCloseTabs, 'all tabs');
+    }
+
+    function openDomainGroup(targetDomains, shouldCloseTabs, groupLabel) {
       const credentials = getCredentials();
 
       if (!credentials) {
         return;
       }
 
-      const preparedTabs = domains.map((domain, index) => {
+      const preparedTabs = targetDomains.map((domain, index) => {
         const tab = window.open('about:blank', `stage-auth-${index}`);
 
         if (!tab) {
@@ -350,9 +406,9 @@
       }
 
       if (blockedDomains.length) {
-        setStatus(`Opened ${openedTabs.length} of ${domains.length}. Browser blocked: ${blockedDomains.join(', ')}`, true);
+        setStatus(`Opened ${openedTabs.length} of ${targetDomains.length} ${groupLabel}. Browser blocked: ${blockedDomains.join(', ')}`, true);
       } else {
-        setStatus(`Opened ${openedTabs.length} tabs. Running several auth passes for each domain...`);
+        setStatus(`Opened ${openedTabs.length} ${groupLabel}. Running several auth passes for each domain...`);
       }
 
       openedTabs.forEach(({ domain, tab }, index) => {
@@ -395,6 +451,16 @@
       const row = document.createElement('div');
       row.className = 'domain-row';
 
+      const meta = document.createElement('div');
+      meta.className = 'domain-meta';
+
+      if (minimalDomainSet.has(domain)) {
+        const dot = document.createElement('span');
+        dot.className = 'minimal-dot';
+        dot.title = 'Minimal tab';
+        meta.appendChild(dot);
+      }
+
       const link = document.createElement('a');
       link.href = getPlainUrl(domain);
       link.target = '_blank';
@@ -402,12 +468,14 @@
       link.textContent = getPlainUrl(domain);
       link.className = 'domain-link';
 
+      meta.appendChild(link);
+
       const button = document.createElement('button');
       button.textContent = 'Open with auth';
       button.className = 'single-button';
       button.onclick = () => openSingle(domain);
 
-      row.appendChild(link);
+      row.appendChild(meta);
       row.appendChild(button);
 
       li.appendChild(row);
