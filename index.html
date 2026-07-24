@@ -195,9 +195,10 @@
     }
 
     function getDomainSettings(domain) {
-      return domainSettings[domain] || {
+      return {
         displayPath: defaultPath,
-        authPath: defaultPath
+        authPath: defaultPath,
+        ...domainSettings[domain]
       };
     }
 
