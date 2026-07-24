@@ -256,14 +256,13 @@
         return;
       }
 
-      const tab = window.open('about:blank', '_blank');
+      const url = getAuthUrl(domain, credentials);
+      const tab = window.open(url, '_blank');
 
       if (!tab) {
         setStatus('Browser blocked the tab. Allow popups for this page and try again.', true);
         return;
       }
-
-      runNavigationSequence(tab, domain, credentials, 0);
     }
 
     function unlockBulkOpen() {
