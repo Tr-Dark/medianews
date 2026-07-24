@@ -150,6 +150,14 @@
 
     const defaultPath = '/';
     const domainSettings = {
+      'www2.obozrevatel.com': {
+        authCycles: 4,
+        revisitAfterBulkOpen: true
+      },
+      'war2.obozrevatel.com': {
+        authCycles: 4,
+        revisitAfterBulkOpen: true
+      },
       'admin-medianews.obozrevatel.com': {
         displayPath: '/login',
         authPath: '/login',
@@ -234,6 +242,10 @@
       });
 
       return steps.length;
+    }
+
+    function getRevisitDomains() {
+      return domains.filter(domain => getDomainSettings(domain).revisitAfterBulkOpen);
     }
 
     function openSingle(domain) {
@@ -356,6 +368,24 @@
             }
           }, startDelayMs + stepsCount * authStepDelayMs + closeDelayMs);
         }
+      });
+
+      const revisitDomains = getRevisitDomains();
+      const revisitStartDelayMs = openedTabs.length * openDelayMs + 4000;
+
+      revisitDomains.forEach((domain, revisitIndex) => {
+        const preparedTab = openedTabs.find(item => item.domain === domain);
+
+        if (!preparedTab) {
+          return;
+        }
+
+        runNavigationSequence(
+          preparedTab.tab,
+          domain,
+          credentials,
+          revisitStartDelayMs + revisitIndex * 2000
+        );
       });
     }
 
