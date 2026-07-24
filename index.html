@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Medianews Editor Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: 40px auto;
+      line-height: 1.5;
+      padding: 0 16px;
+    }
+
+    input, button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0 16px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .hint {
+      color: #555;
+      font-size: 14px;
+    }
+
+    ul {
+      padding-left: 20px;
+    }
+
+    li {
+      margin-bottom: 6px;
+    }
+
+    a {
+      color: #0969da;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .domain-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .domain-link {
+      flex: 1;
+      word-break: break-all;
+    }
+
+    .single-button {
+      width: auto;
+      padding: 4px 8px;
+      margin: 0;
+      font-size: 13px;
+    }
+
+    .danger-hint {
+      color: #b00020;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Medianews Editor Login</h1>
+
+  <label>Login</label>
+  <input id="login" type="text" placeholder="stage login" />
+
+  <label>Password</label>
+  <input id="password" type="password" placeholder="stage password" />
+
+  <button onclick="openAll(true)">Open all and close tabs</button>
+  <button onclick="openAll(false)">Open all and keep tabs open</button>
+
+  <p class="hint">
+    This page opens all protected Medianews stage domains with Basic Auth.
+    Tabs are pre-opened on click to reduce popup blocking.
+  </p>
+
+  <p class="hint">
+    Some domains may still return 403 or 404 on the root path <code>/</code>.
+    That does not always mean Basic Auth failed.
+  </p>
+
+  <p class="danger-hint">
+    Important: credentials are stored in this file and passed via URL during auth.
+    Use only for internal staging.
+  </p>
+
+  <h3>Domains:</h3>
+  <p id="status" class="hint"></p>
+  <ul id="domainsList"></ul>
+
+  <script>
+    const savedCredentials = {
+      basicAuth: {
+        login: 'editor',
+        password: 'editor123'
+      }
+    };
+
+    const domains = [
+      'www2.obozrevatel.com',
+      'cdn4.obozrevatel.com',
+      'i4.obozrevatel.com',
+      'news2.obozrevatel.com',
+      'war2.obozrevatel.com',
+      'soc2.obozrevatel.com',
+      'incident2.obozrevatel.com',
+      'hot2.obozrevatel.com',
+      'healthnews2.obozrevatel.com',
+      'finance2.obozrevatel.com',
+      'competitions2.obozrevatel.com',
+      'rest2.obozrevatel.com',
+      'hub2.obozrevatel.com',
+      'sport2.obozrevatel.com',
+      'covid2.obozrevatel.com',
+      'food2.obozrevatel.com',
+      'shkola2.obozrevatel.com',
+      'med2.obozrevatel.com',
+      'life2.obozrevatel.com',
+      'bewell2.obozrevatel.com',
+      'realty2.obozrevatel.com',
+      'admin-medianews.obozrevatel.com'
+    ];
+
+    const defaultPath = '/';
+    const domainSettings = {
+      'admin-medianews.obozrevatel.com': {
+        displayPath: '/login',
+        authPath: '/login'
+      }
+    };
+    const openDelayMs = 500;
+    const closeDelayMs = 10000;
+
+    const domainsList = document.getElementById('domainsList');
+    const status = document.getElementById('status');
+
+    function setStatus(message, isError = false) {
+      status.textContent = message;
+      status.style.color = isError ? '#b00020' : '#555';
+    }
+
+    function fillSavedCredentials() {
+      document.getElementById('login').value = savedCredentials.basicAuth.login || '';
+      document.getElementById('password').value = savedCredentials.basicAuth.password || '';
+    }
+
+    function getCredentials() {
+      const login = document.getElementById('login').value.trim();
+      const password = document.getElementById('password').value;
+
+      if (!login || !password) {
+        alert('Enter login and password');
+        return null;
+      }
+
+      return { login, password };
+    }
+
+    function getDomainSettings(domain) {
+      return domainSettings[domain] || {
+        displayPath: defaultPath,
+        authPath: defaultPath
+      };
+    }
+
+    function getAuthUrl(domain, credentials) {
+      const settings = getDomainSettings(domain);
+      const encodedLogin = encodeURIComponent(credentials.login);
+      const encodedPassword = encodeURIComponent(credentials.password);
+
+      return `https://${encodedLogin}:${encodedPassword}@${domain}${settings.authPath}`;
+    }
+
+    function getPlainUrl(domain) {
+      const settings = getDomainSettings(domain);
+      return `https://${domain}${settings.displayPath}`;
+    }
+
+    function openSingle(domain) {
+      const credentials = getCredentials();
+
+      if (!credentials) {
+        return;
+      }
+
+      const url = getAuthUrl(domain, credentials);
+      window.open(url, '_blank');
+    }
+
+    function openAll(shouldCloseTabs) {
+      const credentials = getCredentials();
+
+      if (!credentials) {
+        return;
+      }
+
+      const preparedTabs = domains.map((domain, index) => {
+        const tab = window.open('about:blank', `stage-auth-${index}`);
+
+        if (!tab) {
+          return { domain, blocked: true };
+        }
+
+        tab.document.write(`
+          <!doctype html>
+          <html lang="en">
+            <head>
+              <meta charset="UTF-8" />
+              <title>Authorizing ${domain}</title>
+            </head>
+            <body style="font-family: Arial, sans-serif; padding: 16px;">
+              <p>Authorizing <strong>${domain}</strong>...</p>
+            </body>
+          </html>
+        `);
+        tab.document.close();
+
+        return { domain, tab, blocked: false };
+      });
+
+      const blockedDomains = preparedTabs
+        .filter(item => item.blocked)
+        .map(item => item.domain);
+      const openedTabs = preparedTabs.filter(item => !item.blocked);
+
+      if (!openedTabs.length) {
+        setStatus('Browser blocked all popups. Allow popups for this page and try again.', true);
+        return;
+      }
+
+      if (blockedDomains.length) {
+        setStatus(`Opened ${openedTabs.length} of ${domains.length}. Browser blocked: ${blockedDomains.join(', ')}`, true);
+      } else {
+        setStatus(`Opened ${openedTabs.length} tabs. Authorizing domains...`);
+      }
+
+      openedTabs.forEach(({ domain, tab }, index) => {
+        const url = getAuthUrl(domain, credentials);
+
+        setTimeout(() => {
+          try {
+            tab.location.replace(url);
+          } catch (error) {
+            console.warn(`Failed to open domain: ${domain}`, error);
+          }
+        }, index * openDelayMs);
+
+        if (shouldCloseTabs) {
+          setTimeout(() => {
+            try {
+              tab.close();
+            } catch (error) {
+              console.warn(`Failed to close tab: ${domain}`, error);
+            }
+          }, index * openDelayMs + closeDelayMs);
+        }
+      });
+    }
+
+    domains.forEach(domain => {
+      const li = document.createElement('li');
+
+      const row = document.createElement('div');
+      row.className = 'domain-row';
+
+      const link = document.createElement('a');
+      link.href = getPlainUrl(domain);
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.textContent = getPlainUrl(domain);
+      link.className = 'domain-link';
+
+      const button = document.createElement('button');
+      button.textContent = 'Open with auth';
+      button.className = 'single-button';
+      button.onclick = () => openSingle(domain);
+
+      row.appendChild(link);
+      row.appendChild(button);
+
+      li.appendChild(row);
+      domainsList.appendChild(li);
+    });
+
+    fillSavedCredentials();
+  </script>
+</body>
+</html>
