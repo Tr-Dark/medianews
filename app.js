@@ -55,6 +55,7 @@
 
   const typicalPages = [
     { label: 'Головна сторінка', url: 'https://www2.obozrevatel.com/' },
+    { label: 'Інший піддомен', url: 'https://war2.obozrevatel.com/' },
     { label: 'Розділ', url: 'https://www2.obozrevatel.com/ukr/ekonomika-glavnaya/' },
     { label: 'Підрозділ', url: 'https://www2.obozrevatel.com/ukr/ekonomika-glavnaya/communalka/' },
     { label: 'Картина дня', url: 'https://www2.obozrevatel.com/ukr/main-item/06-11-2025.htm' },
@@ -64,7 +65,9 @@
     { label: 'AMP новина-блог', url: 'https://www2.obozrevatel.com/ukr/politics-news/pomer-odin-z-batkiv-politichnogo-tsinizmu-chomu-ukraintsyam-ne-varto-osoblivo-vihvalyati-genri-kissindzhera/amp.htm' },
     { label: 'Тег', url: 'https://www2.obozrevatel.com/ukr/tag-rossiya-strana-agressor.html' },
     { label: 'Тема', url: 'https://www2.obozrevatel.com/ukr/topic-1-aprelya.html' },
-    { label: 'Персона', url: 'https://www2.obozrevatel.com/ukr/person-astrooboz.html' },
+    { label: 'Персона', url: 'https://www2.obozrevatel.com/ukr/person-volodimir-zelenskij.html' },
+    { label: 'Сторінка автора', url: 'https://www2.obozrevatel.com/ukr/person-aleksandr-chekanov.html' },
+    { label: 'Публічна персона', url: 'https://www2.obozrevatel.com/ukr/person-yaroslava-maguchih.html' },
     { label: 'Усі блоги', url: 'https://www2.obozrevatel.com/ukr/p-blog.html' },
     { label: 'Спецпроєкти', url: 'https://www2.obozrevatel.com/ukr/p-specialproject.html' },
     { label: 'Важливе', url: 'https://www2.obozrevatel.com/ukr/p-supertop.html' },
