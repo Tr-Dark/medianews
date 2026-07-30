@@ -54,16 +54,15 @@
   const minimalDomainSet = new Set(minimalDomains);
 
   const typicalPages = [
+    { label: 'Головна сторінка', url: 'https://www2.obozrevatel.com/' },
     { label: 'Розділ', url: 'https://www2.obozrevatel.com/ukr/ekonomika-glavnaya/' },
-    { label: 'Підрозділ', url: 'https://www2.obozrevatel.com/ukr/ekonomika-glavnaya/analytics-and-forecasts/' },
+    { label: 'Підрозділ', url: 'https://www2.obozrevatel.com/ukr/ekonomika-glavnaya/communalka/' },
     { label: 'Картина дня', url: 'https://www2.obozrevatel.com/ukr/main-item/06-11-2025.htm' },
     { label: 'Новина', url: 'https://www2.obozrevatel.com/ukr/puteshestviya/butskij-kanjon-malenka-shvejtsariya-u-cherkaskij-oblasti.htm' },
     { label: 'AMP новина', url: 'https://www2.obozrevatel.com/puteshestviya/butskij-kanon-malenkaya-shvejtsariya-v-cherkasskoj-oblasti/amp.htm' },
     { label: 'Новина-блог', url: 'https://www2.obozrevatel.com/ukr/politics-news/pomer-odin-z-batkiv-politichnogo-tsinizmu-chomu-ukraintsyam-ne-varto-osoblivo-vihvalyati-genri-kissindzhera.htm' },
     { label: 'AMP новина-блог', url: 'https://www2.obozrevatel.com/ukr/politics-news/pomer-odin-z-batkiv-politichnogo-tsinizmu-chomu-ukraintsyam-ne-varto-osoblivo-vihvalyati-genri-kissindzhera/amp.htm' },
     { label: 'Тег', url: 'https://www2.obozrevatel.com/ukr/tag-rossiya-strana-agressor.html' },
-    { label: 'Місто', url: 'https://www2.obozrevatel.com/ukr/tag-kiev.html' },
-    { label: 'Країна', url: 'https://www2.obozrevatel.com/ukr/tag-ukraina.html' },
     { label: 'Тема', url: 'https://www2.obozrevatel.com/ukr/topic-1-aprelya.html' },
     { label: 'Персона', url: 'https://www2.obozrevatel.com/ukr/person-astrooboz.html' },
     { label: 'Усі блоги', url: 'https://www2.obozrevatel.com/ukr/p-blog.html' },
