@@ -1,5 +1,6 @@
 (function () {
   const config = window.medianewsConfig || {};
+  const assetBasePath = config.assetBasePath || './';
 
   const savedCredentials = {
     basicAuth: {
@@ -52,7 +53,7 @@
 
   const minimalDomainSet = new Set(minimalDomains);
 
-  const testPages = [
+  const typicalPages = [
     { label: 'Розділ', url: 'https://www2.obozrevatel.com/ukr/ekonomika-glavnaya/' },
     { label: 'Підрозділ', url: 'https://www2.obozrevatel.com/ukr/ekonomika-glavnaya/analytics-and-forecasts/' },
     { label: 'Картина дня', url: 'https://www2.obozrevatel.com/ukr/main-item/06-11-2025.htm' },
@@ -60,7 +61,7 @@
     { label: 'AMP новина', url: 'https://www2.obozrevatel.com/puteshestviya/butskij-kanon-malenkaya-shvejtsariya-v-cherkasskoj-oblasti/amp.htm' },
     { label: 'Новина-блог', url: 'https://www2.obozrevatel.com/ukr/politics-news/pomer-odin-z-batkiv-politichnogo-tsinizmu-chomu-ukraintsyam-ne-varto-osoblivo-vihvalyati-genri-kissindzhera.htm' },
     { label: 'AMP новина-блог', url: 'https://www2.obozrevatel.com/ukr/politics-news/pomer-odin-z-batkiv-politichnogo-tsinizmu-chomu-ukraintsyam-ne-varto-osoblivo-vihvalyati-genri-kissindzhera/amp.htm' },
-    { label: 'Тег', url: 'https://www2.obozrevatel.com/ukr/tag-ukrainskij-yazyik.html' },
+    { label: 'Тег', url: 'https://www2.obozrevatel.com/ukr/tag-rossiya-strana-agressor.html' },
     { label: 'Місто', url: 'https://www2.obozrevatel.com/ukr/tag-kiev.html' },
     { label: 'Країна', url: 'https://www2.obozrevatel.com/ukr/tag-ukraina.html' },
     { label: 'Тема', url: 'https://www2.obozrevatel.com/ukr/topic-1-aprelya.html' },
@@ -100,7 +101,7 @@
 
   let statusNode;
   let domainsListNode;
-  let testPagesListNode;
+  let typicalPagesListNode;
 
   function createLayout() {
     document.title = config.pageTitle || 'Medianews';
@@ -110,13 +111,28 @@
         <section class="hero">
           <div class="hero-badge">Medianews • ${escapeHtml(config.accountName || 'Редакція')}</div>
           <h1>${escapeHtml(config.pageHeading || 'Medianews')}</h1>
-          <p>Сторінка допомагає швидко пройти Basic Auth на staging-доменах і відкрити тестові сторінки для перевірки.</p>
+          <p>Сторінка допомагає швидко пройти Basic Auth на новому закритому продакшені Medianews і перевірити типові сторінки без повторного вводу пароля.</p>
         </section>
 
         <div class="grid">
           <section class="card">
             <h2>Вхід</h2>
             <p class="muted">Логін і пароль уже підставлені. За потреби їх можна змінити вручну.</p>
+
+            <div class="credentials-box">
+              <div class="credentials-title">Дані для ручного входу</div>
+              <div class="credentials-grid">
+                <div class="credential-item">
+                  <div class="credential-label">Логін</div>
+                  <div class="credential-value">${escapeHtml(savedCredentials.basicAuth.login)}</div>
+                </div>
+                <div class="credential-item credential-item-accent">
+                  <div class="credential-label">Пароль</div>
+                  <div class="credential-value">${escapeHtml(savedCredentials.basicAuth.password)}</div>
+                </div>
+              </div>
+              <p class="credentials-note">Якщо якийсь домен усе ще просить пароль, можна відкрити його через кнопку <strong>«Відкрити з авторизацією»</strong> або ввести ці дані вручну.</p>
+            </div>
 
             <div class="field">
               <label for="login">Логін</label>
@@ -138,24 +154,37 @@
             <p id="status" class="status"></p>
 
             <div class="warning-box">
-              Увага: логін і пароль збережені в цій сторінці та передаються в URL під час авторизації. Використовуйте це лише для внутрішнього staging-середовища.
+              Увага: логін і пароль збережені на цій сторінці та передаються в URL під час авторизації. Використовуйте це тільки для нового закритого продакшену Medianews.
             </div>
           </section>
 
           <section class="card">
-            <h2>Як користуватись</h2>
+            <h2>Інструкція</h2>
             <ol class="instruction-list">
-              <li>Натисніть <strong>«Дозволити попапи для цієї сторінки»</strong>.</li>
-              <li>Якщо браузер показав запит на дозвіл попапів, натисніть <strong>Allow / Дозволити</strong>.</li>
-              <li>Для швидкого сценарію використовуйте <strong>«Відкрити і закрити мінімальний набір з авторизацією»</strong>.</li>
-              <li>Якщо потрібно прогріти всі домени, використовуйте одну з кнопок <strong>«Відкрити все...»</strong>.</li>
-              <li>Після авторизації відкрийте кілька тестових сторінок нижче і перевірте, чи сайт не просить пароль повторно.</li>
+              <li>
+                Натисніть <strong>«Дозволити попапи для цієї сторінки»</strong>.
+                <figure class="instruction-figure">
+                  <img src="${assetBasePath}images/popup-step-close.png" alt="Технічна вкладка перевірки попапів" />
+                  <figcaption>Після натискання відкриється технічна вкладка перевірки попапів. Її потрібно закрити.</figcaption>
+                </figure>
+              </li>
+              <li>
+                Після цього зверху в браузері відкрийте повідомлення про заблоковані попапи, увімкніть опцію дозволу і натисніть <strong>«Готово»</strong>.
+                <figure class="instruction-figure">
+                  <img src="${assetBasePath}images/popup-step-allow.png" alt="Дозвіл попапів у браузері" />
+                  <figcaption>Увімкніть дозвіл попапів для сторінки та підтвердьте зміни.</figcaption>
+                </figure>
+              </li>
+              <li>Натисніть <strong>«Відкрити і закрити мінімальний набір з авторизацією»</strong>.</li>
+              <li>Почекайте 1-2 хвилини, поки вкладки самі відкриються і закриються.</li>
+              <li>Після цього відкрийте кілька типових сторінок нижче і перевірте, що сайт більше не просить пароль.</li>
+              <li>Якщо якийсь домен не застосував авторизацію, відкрийте його через кнопку <strong>«Відкрити з авторизацією»</strong> або введіть логін і пароль вручну.</li>
             </ol>
 
             <ul class="tip-list">
-              <li>Якщо відкрилась лише одна вкладка, зазвичай це означає, що браузер ще не дозволив попапи.</li>
-              <li>Скріншоти з інструкцією по закриттю вкладки та видачі дозволів можна буде додати сюди окремо.</li>
+              <li>Якщо відкрилась лише одна вкладка, значить браузер ще не дозволив попапи для цієї сторінки.</li>
               <li>Зелений кружечок біля домену означає, що він входить у мінімальний набір.</li>
+              <li>Кнопка «Відкрити з авторизацією» корисна для точкового догріву конкретного домену.</li>
             </ul>
           </section>
         </div>
@@ -172,9 +201,9 @@
           </section>
 
           <section class="card">
-            <h2>Тестові сторінки</h2>
+            <h2>Типові сторінки</h2>
             <p class="section-note">Після прогріву авторизації відкрийте кілька сторінок із цього списку та перевірте, що вони відкриваються без повторного вводу пароля.</p>
-            <ul id="testPagesList" class="test-page-list"></ul>
+            <ul id="typicalPagesList" class="test-page-list"></ul>
           </section>
         </div>
       </main>
@@ -182,7 +211,7 @@
 
     statusNode = document.getElementById('status');
     domainsListNode = document.getElementById('domainsList');
-    testPagesListNode = document.getElementById('testPagesList');
+    typicalPagesListNode = document.getElementById('typicalPagesList');
 
     document.getElementById('allowPopupsButton').onclick = unlockBulkOpen;
     document.getElementById('minimalButton').onclick = openMinimalTabs;
@@ -295,7 +324,7 @@
     }
   }
 
-  function openTestPage(url) {
+  function openTypicalPage(url) {
     window.open(url, '_blank');
   }
 
@@ -303,7 +332,7 @@
     const warmupTabs = [];
 
     for (let index = 0; index < Math.min(domains.length, popupWarmupCount); index += 1) {
-      const tab = window.open('about:blank', `stage-popup-warmup-${index}`);
+      const tab = window.open('about:blank', `prod-popup-warmup-${index}`);
 
       if (!tab) {
         setStatus(
@@ -336,7 +365,7 @@
         try {
           tab.close();
         } catch (error) {
-          console.warn('Не вдалося закрити warm-up вкладку', error);
+          console.warn('Не вдалося закрити технічну вкладку', error);
         }
       });
     }, 1500);
@@ -354,7 +383,7 @@
     }
 
     const preparedTabs = targetDomains.map((domain, index) => {
-      const tab = window.open('about:blank', `stage-auth-${index}`);
+      const tab = window.open('about:blank', `prod-auth-${index}`);
 
       if (!tab) {
         return { domain, blocked: true };
@@ -462,8 +491,8 @@
     });
   }
 
-  function renderTestPages() {
-    testPages.forEach(page => {
+  function renderTypicalPages() {
+    typicalPages.forEach(page => {
       const item = document.createElement('li');
       item.className = 'test-page-row';
 
@@ -487,16 +516,16 @@
       const button = document.createElement('button');
       button.textContent = 'Відкрити';
       button.className = 'small-button button-secondary';
-      button.onclick = () => openTestPage(page.url);
+      button.onclick = () => openTypicalPage(page.url);
 
       item.appendChild(meta);
       item.appendChild(button);
-      testPagesListNode.appendChild(item);
+      typicalPagesListNode.appendChild(item);
     });
   }
 
   createLayout();
   fillSavedCredentials();
   renderDomains();
-  renderTestPages();
+  renderTypicalPages();
 })();

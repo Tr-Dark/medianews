@@ -63,11 +63,6 @@ body {
   font-size: 22px;
 }
 
-.card h3 {
-  margin: 0 0 10px;
-  font-size: 18px;
-}
-
 .muted {
   color: #56677c;
 }
@@ -90,6 +85,62 @@ body {
   padding: 12px 14px;
   font-size: 15px;
   background: #fbfdff;
+}
+
+.credentials-box {
+  margin: 18px 0;
+  padding: 16px;
+  border-radius: 16px;
+  background: #ecfdf3;
+  border: 1px solid #b7ebc6;
+}
+
+.credentials-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #0f5132;
+}
+
+.credentials-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.credential-item {
+  background: #ffffff;
+  border: 1px solid #d7e2f0;
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.credential-item-accent {
+  border-color: #84cc16;
+  box-shadow: inset 0 0 0 1px rgba(132, 204, 22, 0.2);
+}
+
+.credential-label {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #5b6b80;
+  margin-bottom: 8px;
+}
+
+.credential-value {
+  font-size: 26px;
+  line-height: 1.1;
+  font-weight: 800;
+  color: #12263a;
+  word-break: break-word;
+}
+
+.credentials-note {
+  margin: 12px 0 0;
+  color: #355e48;
+  font-size: 14px;
 }
 
 .button-stack {
@@ -151,7 +202,28 @@ button:hover {
 }
 
 .instruction-list li {
-  margin-bottom: 10px;
+  margin-bottom: 14px;
+}
+
+.instruction-figure {
+  margin: 12px 0 4px;
+  border: 1px solid #d7e2f0;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.instruction-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.instruction-figure figcaption {
+  padding: 12px 14px;
+  font-size: 14px;
+  color: #475569;
+  background: #f8fbff;
 }
 
 .tip-list {
@@ -247,6 +319,14 @@ button:hover {
 
   .hero h1 {
     font-size: 28px;
+  }
+
+  .credentials-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .credential-value {
+    font-size: 24px;
   }
 
   .domain-row,
